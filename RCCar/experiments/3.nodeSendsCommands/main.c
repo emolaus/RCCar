@@ -1,10 +1,12 @@
+/**/
+
 #include <stdio.h>
 #include <string.h>
 #include "wiringSerial.h"
 
 int main() {
 	 int res = serialOpen("/dev/ttyACM0", 9600);
-printf("You opened %d\n", res);
+	printf("You opened %d\n", res);
 	printf("TODO: figure out how to read a string correctly\n");
 	while(1) {
 		printf("Type 1 (on), 0(off) or q (quit): ");
