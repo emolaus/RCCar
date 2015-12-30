@@ -1,5 +1,5 @@
 var net = require('net');
-require('child-process').exec('rm -f ./socket', function (error, stdout, stderr) {
+require('child_process').exec('rm -f ./socket', function (error, stdout, stderr) {
   if(error != null) {
     console.log('Error when removing .socket.');
   }
@@ -7,12 +7,10 @@ require('child-process').exec('rm -f ./socket', function (error, stdout, stderr)
     var unixServer = net.createServer(function (client) {
       client.on('data', function (data) {
         console.log('received data on unix socket');
-      } 
-    }
-  } catch (e) {
-        console.log('failed creating unix socket server.');
-      }
+      }); 
     });
+  } catch (e) {
+      console.log('failed creating unix socket server.');
   }
   try {
     unixServer.listen('./socket');
