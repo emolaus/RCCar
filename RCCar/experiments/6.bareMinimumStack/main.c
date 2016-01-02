@@ -22,7 +22,8 @@ int main() {
     exit(-1);
   }
   // Init serial bus to Arduino
-  int serialFD = serialOpen("/dev/ttyACM0", 9600);
+  serialFD = serialOpen("/dev/ttyACM0", 9600);
+  printf("Opened serial device %d\n", serialFD);
   // TODO while-loop 
   // - check for commands
   // - pass command on serial bus 
@@ -54,5 +55,6 @@ int fetchCommand() {
   
 }
 void relayCommand() {
-  serialPrintf(serialFD, "%d\n", intCommand);
+  printf("Relaying %d\n", intCommand);
+  serialPrintf(serialFD, "%i\n", intCommand);
 }
