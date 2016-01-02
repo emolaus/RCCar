@@ -5,6 +5,10 @@
 #include "client.h"
 
 int intCommand;
+int serialFD;
+
+int fetchCommand();
+void relayCommand();
 /*
  * gcc -o main -I/home/pi/wiringpi/wiringPi/ -L/home/pi/wiringPi/devLib/ main.c client.c -lwiringPi
  * 
@@ -18,25 +22,37 @@ int main() {
     exit(-1);
   }
   // Init serial bus to Arduino
-  //int res = serialOpen("/dev/ttyACM0", 9600);
+  int serialFD = serialOpen("/dev/ttyACM0", 9600);
   // TODO while-loop 
   // - check for commands
   // - pass command on serial bus 
   
+  int commandResult;
   while(1) {
-    intCommand = checkCommand();
-    if (intCommand == -1) {
-      printf("Read error. Finishing.");
-      break;
+    commandResult = fetchCommand();
+    if (commandResult == -1 || commandResult == -2) break;
+    if (commandResult >= 0) {
+      printf("Command: %d\n", intCommand);
+      relayCommand();
     }
-    if (intCommand == -2) {
-      printf("Socket closed. Finishing.");
-      // TODO set speed and turn to 0;
-      break;
-    }
-    if (intCommand < 0) continue;
-    printf("Command: %d\n", intCommand);
+    // TODO read data from Arduino
   }
   closeSocket();
   return 0;
+}
+int fetchCommand() {
+  int result = checkCommand();
+  if (intCommand == -1) {
+    printf("Read error. Finishing.");
+  }
+  if (intCommand == -2) {
+    printf("Socket closed. Finishing.");
+    // TODO set speed and turn to 0;
+  }
+  if (result >= 0) intCommand = result;
+  return result;
+  
+}
+void relayCommand() {
+  serialPrintf(serialFD, "%d\n", intCommand);
 }

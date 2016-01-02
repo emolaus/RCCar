@@ -3,7 +3,6 @@
 char *socket_path = "./socket";
 //char *socket_path = "\0hidden";
 struct sockaddr_un addr;
-char buf[100];
 int fd,rc, cl;
 // select stuff
 fd_set readset;

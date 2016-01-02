@@ -8,3 +8,4 @@
 int openSocket();
 int closeSocket();
 int checkCommand();
+char buf[100];
