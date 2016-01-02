@@ -8,27 +8,61 @@
     <meta name="author" content="">
     
     <title>RC Car</title>
-    <script src="bootstrap.min.js"></script>
     <script src="jquery.min.js"></script>
+    <script src="bootstrap.min.js"></script>
     <link rel="stylesheet" href="bootstrap.min.css">
+    <script>
+      
+      $(document).ready(function () {
+        $('#LF').click(function () {
+          sendCommand(1000 + speed());
+        });
+        $('#F').click(function () {
+          sendCommand(speed());
+        });
+        $('#RF').click(function () {
+          sendCommand(2000 + speed());
+        });
+        $('#STOP').click(function () {
+          sendCommand(0);
+        });
+        $('#LR').click(function () {
+          sendCommand(1000 + speed() + 256);
+        });
+        $('#R').click(function () {
+          sendCommand(speed() + 256);
+        });
+        $('#RR').click(function () {
+          sendCommand(2000 + speed() + 256);
+        });
+      });
+      function speed() { return parseInt($('#speedInput').val());}
+      function sendCommand(command) {
+        console.log(command);
+        $.get("command/" + command, function (data) {
+          console.log(data);
+        });
+      }
+    </script>
   </head>
   <body>
-    <!-- page content -->
-    Hello empty html5 doc!
     <div class="container">
       <div class="row">
-        <button type="button" class="btn btn-default">LF</button>
-        <button type="button" class="btn btn-default">F</button>
-        <button type="button" class="btn btn-default">RF</button>
+        <button id="LF" type="button" class="btn btn-default">LF</button>
+        <button id="F" type="button" class="btn btn-default">F</button>
+        <button id="RF" type="button" class="btn btn-default">RF</button>
       </div>
       <div class="row">
-        <button type="button" class="btn btn-default">STOP</button>
+        <button id="STOP" type="button" class="btn btn-default">STOP</button>
       </div>
       <div class="row">
-        <button type="button" class="btn btn-default">LR</button>
-        <button type="button" class="btn btn-default">R</button>
-        <button type="button" class="btn btn-default">RR</button>
-        
+        <button id="LR" type="button" class="btn btn-default">LR</button>
+        <button id="R" type="button" class="btn btn-default">R</button>
+        <button id="RR" type="button" class="btn btn-default">RR</button>
+      </div>
+      <div class="row">
+        <label for="speed">Speed:</label>
+        <input type="number" class="form-control" id="speedInput" value=75>
       </div>
     </container>
   </body>

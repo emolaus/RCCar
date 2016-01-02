@@ -6,4 +6,5 @@
 #include <sys/select.h>
 
 int openSocket();
+int closeSocket();
 int checkCommand();
