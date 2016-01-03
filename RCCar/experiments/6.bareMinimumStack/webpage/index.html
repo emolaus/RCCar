@@ -15,28 +15,29 @@
       
       $(document).ready(function () {
         $('#LF').click(function () {
-          sendCommand(1000 + speed());
+          sendCommand(1000 + speedDuringTurn());
         });
         $('#F').click(function () {
-          sendCommand(speed());
+          sendCommand(speedNoTurn());
         });
         $('#RF').click(function () {
-          sendCommand(2000 + speed());
+          sendCommand(2000 + speedDuringTurn());
         });
         $('#STOP').click(function () {
           sendCommand(0);
         });
         $('#LR').click(function () {
-          sendCommand(1000 + speed() + 256);
+          sendCommand(1000 + speedDuringTurn() + 256);
         });
         $('#R').click(function () {
-          sendCommand(speed() + 256);
+          sendCommand(speedNoTurn() + 256);
         });
         $('#RR').click(function () {
-          sendCommand(2000 + speed() + 256);
+          sendCommand(2000 + speedDuringTurn() + 256);
         });
       });
-      function speed() { return parseInt($('#speedInput').val());}
+      function speedNoTurn() { return parseInt($('#speedInput').val());}
+      function speedDuringTurn() {return parseInt($('#speedAndTurnInput').val());}
       function sendCommand(command) {
         console.log(command);
         $.get("command/" + command, function (data) {
@@ -61,8 +62,10 @@
         <button id="RR" type="button" class="btn btn-default">RR</button>
       </div>
       <div class="row">
-        <label for="speed">Speed:</label>
-        <input type="number" class="form-control" id="speedInput" value=75>
+        <label for="speedInput">Speed w/out turn:</label>
+        <input type="number" class="form-control" id="speedInput" value=125>
+	<label for="speedAndTurnInput">Speed when turning:</label>
+	<input type="number" class="form-control" id="speedAndTurnInput" value=180>
       </div>
     </container>
   </body>
