@@ -35,9 +35,13 @@
         $('#RR').click(function () {
           sendCommand(2000 + speedDuringTurn() + 256);
         });
+	$('#sendSteeringPower').click(function () {
+	  sendCommand(3000 + steeringPower());
+	});
       });
       function speedNoTurn() { return parseInt($('#speedInput').val());}
       function speedDuringTurn() {return parseInt($('#speedAndTurnInput').val());}
+      function steeringPower() {return parseInt($('#steeringPowerInput').val());}
       function sendCommand(command) {
         console.log(command);
         $.get("command/" + command, function (data) {
@@ -66,6 +70,9 @@
         <input type="number" class="form-control" id="speedInput" value=125>
 	<label for="speedAndTurnInput">Speed when turning:</label>
 	<input type="number" class="form-control" id="speedAndTurnInput" value=180>
+	<label for="steeringPowerInput"> Steering power: </label>
+	<input type="number" class="form-control" id="steeringPowerInput" value=150>
+	<button id="sendSteeringPower" type="button" class="btn btn-default">Change steering power</button>
       </div>
     </container>
   </body>

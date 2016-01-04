@@ -1,0 +1,3 @@
+#!/bin/bash
+raspistill -sa -100 -rot 180 -w 200 -h 150 --contrast 50 --nopreview -o tmp/photos/contrast$1.jpg
+

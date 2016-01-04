@@ -14,6 +14,8 @@ Downloads
 .Mathematica
 .mozilla
 Music
+node_modules
+RCCar/experiments/7.turnPowerTests/node_modules
 .node-red
 .npm
 Pictures
@@ -34,3 +36,4 @@ Videos
 .xsession-errors
 .xsession-errors.old
 main
+opencv-3.1.0

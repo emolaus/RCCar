@@ -1,0 +1,3 @@
+#!/bin/bash
+raspistill -sa -100 -rot 180 -w 600 -h 450 --nopreview -o tmp/photos/largeimage$1.jpg
+

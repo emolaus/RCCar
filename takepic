@@ -1,0 +1,3 @@
+#!/bin/bash
+raspistill -sa -100 -rot 180 -w 200 -h 150 --nopreview -o tmp/photos/image$1.jpg
+
