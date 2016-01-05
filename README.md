@@ -1,6 +1,8 @@
 # RCCar
 
-dependencies: wiringPi library for serial communication over USB with Arduino Uno
+dependencies: 
+wiringPi library for serial communication over USB with Arduino Uno
+OpenCV
 
 Current working:
 Trying to improve steering in code
