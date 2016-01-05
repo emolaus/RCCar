@@ -1,0 +1,7 @@
+#!/bin/bash
+i="0"
+while [ $i -lt $1 ]
+do
+raspistill -sa -100 -rot 180 -w 600 -h 450 --contrast 100 --nopreview -o tmp/photos/image$i.jpg
+i=$[$i+1]
+done 

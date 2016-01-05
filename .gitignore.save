@@ -14,15 +14,13 @@ Downloads
 .Mathematica
 .mozilla
 Music
-node_modules
-RCCar/experiments/7.turnPowerTests/node_modules
+
 .node-red
 .npm
 Pictures
 .profile
 Public
 python_games
-release
 .sonic-pi
 .ssh
 Templates
@@ -38,4 +36,3 @@ Videos
 .xsession-errors.old
 main
 opencv-3.1.0
-raspicam-0.1.3/release
