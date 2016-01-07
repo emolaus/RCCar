@@ -20,15 +20,14 @@ using namespace std;
 
 string type2str(int type);
 void shuffleArray(int *arr, int length, int nrOfTimes);
+float outputFromLabelImage(const Mat &image);
 
 int main(int argc, char** argv) {
   const string trainingFileIndices[] = {"0", "1", "2", "3", "4", "5", "6", "7"};
-  int trainingFileCount = 8;
-  int windowWidth = 100, 
-      windowHeight = 100,
+  int trainingFileCount = 1;
+  int windowWidth = 2, 
+      windowHeight = 2,
       inputCount = windowWidth * windowHeight,
-      windowX = 120,
-      windowY = 40,
       nrOfRandomImageSamples = 2,
       nrOfTrainingInputs = nrOfRandomImageSamples * trainingFileCount;
   // Assuming that training images are named e.g. "image0.jpg"
@@ -37,14 +36,13 @@ int main(int argc, char** argv) {
     return -1;
   }
   
-  cout << "If all data is cached into one training round, trainingInput will be about " 
-       << nrOfRandomImageSamples * trainingFileCount * 3 * inputCount/1000 << " kB. Continue?" << endl;
-  char ans;
-  cin >> ans;
+  //cout << "If all data is cached into one training round, trainingInput will be about " 
+  //     << nrOfRandomImageSamples * trainingFileCount * 3 * inputCount/1000.0 << " kB. Continue?" << endl;
+  //char ans;
+  //cin >> ans;
    
   // Since RAM is scarce, this will probably have to be done 
   // in a loop. These should be split up in separate files later.
-  Mat trainingImage, labelImage;
   string testFileName = "image";
   string imageType = ".jpg";
   
@@ -62,6 +60,7 @@ int main(int argc, char** argv) {
   //cout << trainingImage.at<Vec3b>(250,120) << endl;
   
   cout << "Time to start training an MLP." << endl;
+  double t = (double) getTickCount();
   // Training round:
   // TODO Make MLP
   // For each training image:
@@ -71,15 +70,28 @@ int main(int argc, char** argv) {
   
   // Idea: create an array 1,2,...,inputCount and shuffle 
   // and use this to truly randomly pick windows from all files
-  Mat trainingInput(nrOfTrainingInputs, inputCount, CV_32F);
-  Mat trainingOutput(nrOfTrainingInputs, 1, CV_32F);
+  Mat trainingInput(nrOfTrainingInputs, inputCount, CV_32F, Scalar(0));
+  Mat trainingOutput(nrOfTrainingInputs, 1, CV_32F, Scalar(0));
+  
+  trainingInput.at<float>(0,0) = 1;
+  trainingInput.at<float>(nrOfTrainingInputs-1,inputCount-1) = 1;
   
   int indices[nrOfTrainingInputs];
   for (int i = 0; i < nrOfTrainingInputs; i++) {
     indices[i] = i;
   }
   shuffleArray(indices, nrOfTrainingInputs, 10*nrOfTrainingInputs);
+  int indexIndex = 0;
   
+  // Some storage for inside the loop
+  int windowX = 0,
+      windowY = 150;
+  Rect window(windowX, windowY, windowWidth, windowHeight);
+  Mat trainingImage, labelImage;
+  Mat imagePart(windowHeight, windowWidth, CV_8UC1);
+  Mat imagePartAllChannels(windowHeight, windowWidth, CV_8UC3);
+  Mat imagePartFloat(windowHeight, windowWidth, CV_32F); 
+
   for (int i = 0; i < trainingFileCount; i++) {
     trainingImage = imread("../../trainingSet1/" + testFileName + trainingFileIndices[i] + imageType, 1);
     labelImage = imread("../../trainingSet1/" + testFileName + trainingFileIndices[i] + "_label" + imageType, 1);
@@ -88,43 +100,52 @@ int main(int argc, char** argv) {
       printf("Failed loading training image %d\n", i);
       return -1;
     }
-    // Extract the input to imagePartFloat (will later be flattened)
-    Rect window(windowX, windowY, windowWidth, windowHeight);
-    Mat imagePart(windowHeight, windowWidth, CV_8UC1);
-    Mat imagePartAllChannels(trainingImage(window));
-    Mat imagePartFloat(windowHeight, windowWidth, CV_32F);
-    // mixChannels is used to extract one channel
-    Mat out[] = {imagePart};
-    // imagePartAllChannels[0] -> imagePart[0]
-    int from_to[] = {0, 0};
-    mixChannels(&imagePartAllChannels, 1, out, 1, from_to, 1);
-    imagePart.convertTo(imagePartFloat, CV_32F);
-    
+    for (int j = 0; j < nrOfRandomImageSamples; j++) {
+      int randomIndex = indices[indexIndex++];
+      // Generate normalized input 0 <= in <= 1
+      // All below is overkill.. Tried to do it Matlab style
+      // but probably more efficient to just copy element by element
+      // Also, this is all because we're dealing with b/w images currently. 
+      window = Rect(windowX, windowY, windowWidth, windowHeight);
+      imagePart = Mat(windowHeight, windowWidth, CV_8UC1);
+      imagePartAllChannels = Mat(trainingImage(window));
+      imagePartFloat = Mat(windowHeight, windowWidth, CV_32F);
+      // mixChannels is used to extract one channel
+      Mat out[] = {imagePart};
+      // imagePartAllChannels[0] -> imagePart[0]
+      int from_to[] = {0, 0};
+      mixChannels(&imagePartAllChannels, 1, out, 1, from_to, 1);
+      imagePart.convertTo(imagePartFloat, CV_32F);
+      
+      Mat flattenedInput = imagePartFloat.reshape(0, inputCount).t();
+      
+      flattenedInput = flattenedInput/255;
+      
+      Mat tmp = trainingInput.row(randomIndex);
+      flattenedInput.copyTo(tmp);
+      
+      // Generate normalized output. Remember, -1 <= output <= 1
       // Extract the output to labelPart
-      Mat labelPart(labelImage(window)); // Remember, -1 <= output <= 1
-
-    // Now, imagePartFloat is the data to be used as one input to MLP training
-    // and labelPart is the data to be used as one output
-    
-    // Probably sub-optimal to copy the matrix data so many times...
-    // Better to loop through indices of window by myself and copy to output?
-    // For this application, it's not necessary since not real-time 
-    
-    //imshow("imagePart", imagePart); imshow("labelPart", labelPart); waitKey(0);
-    Mat flattenedInput = imagePartFloat.reshape(0, inputCount).t();
-    
-    // Copy flattenedInput to trainingInput
-    Mat tmp(trainingInput(Range(1,1), Range(1,inputCount)));
-    flattenedInput.copyTo(tmp);
-  }
-
-
+      Mat labelPart(labelImage(window));
+      Scalar summed = sum(labelPart);
+      float output = (float) summed[0] / (255.0 * (float) (inputCount));
+      output = output * 2 - 1;
+      trainingOutput.at<float>(randomIndex, 0) = output;
+    }
+  } 
+  t = ((double)getTickCount() - t)/getTickFrequency();
+  cout << "Generated training data in " << t << " s." << endl;
+  cout << trainingOutput << endl;
   // Evaluation round:
   // Given: an MLP, training sets, cross verification sets
   // Create input and output
   // Predict from given input
   // Calculate and return error
 
+  Mat layerSizes = (Mat_<uchar>(3,1) < 3, 10, 1);
+  cout << layerSizes;
+  CvANN_MLP neuralNet(layerSizes);
+  
   // Look at resulting prediction 
   return 0;
 }
@@ -161,4 +182,8 @@ void shuffleArray(int *arr, int length, int nrOfTimes) {
     arr[i2] = tmp;
   }
   return;
+}
+float outputFromLabelImage(const Mat &image) {
+   
+  return 0;
 }
